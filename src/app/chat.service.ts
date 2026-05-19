@@ -1,16 +1,32 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ChatService {
+  async sendMessage(message: string): Promise<any> {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 10000);
 
-  constructor(private http: HttpClient) { }
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+        signal: controller.signal,
+      });
 
-  sendMessage(message: string): Observable<any> {
-    // Replace with your actual API endpoint
-    return this.http.post('/api/chat', { message });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'No se pudo conectar con el asistente.');
+      }
+
+      return data;
+    } finally {
+      window.clearTimeout(timeout);
+    }
   }
 }

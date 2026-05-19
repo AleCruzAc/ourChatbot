@@ -1,14 +1,51 @@
-<div class="chat-section">
-    <div class="chat-container">
-        <div *ngFor="let message of messages">
-            <b>{{message.sender}}:</b> {{message.text}}
-        </div>
-
-        <div *ngIf="loading">Escribiendo...</div>
-
-        <div class="input-container">
-            <input [(ngModel)]="userInput" placeholder="Escribe tu mensaje..." />
-            <button (click)="sendMessage()">Enviar</button>
-        </div>
+<section class="chat-panel" aria-label="Chat de orientacion profesional">
+  <header class="chat-header">
+    <div>
+      <p>Orientacion profesional EAN</p>
+      <h2>Impacto de la IA en tu carrera</h2>
     </div>
-</div>
+  </header>
+
+  <div class="messages" aria-live="polite">
+    <div *ngIf="messages.length === 0" class="empty-state">
+      <div class="empty-icon">IA</div>
+      <p>Pregunta por una carrera, habilidades recomendadas o formas de adaptarte a la inteligencia artificial.</p>
+    </div>
+
+    <div
+      *ngFor="let message of messages"
+      class="message-row"
+      [class.user-row]="message.sender === 'Tu'"
+      [class.bot-row]="message.sender === 'Bot'"
+    >
+      <div class="message-stack">
+        <span class="message-label">{{ message.sender }}</span>
+        <div class="message-bubble">
+          <p>{{ message.text }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="message-row bot-row">
+      <div class="message-stack">
+        <span class="message-label">Bot</span>
+        <div class="message-bubble loading-bubble">
+          <p>Analizando tu pregunta...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+  <form class="input-container" (ngSubmit)="sendMessage()">
+    <input
+      name="message"
+      [(ngModel)]="userInput"
+      placeholder="Escribe tu pregunta sobre IA y tu carrera"
+      [disabled]="loading"
+      autocomplete="off"
+    />
+    <button type="submit" [disabled]="loading || !userInput.trim()">Enviar</button>
+  </form>
+</section>

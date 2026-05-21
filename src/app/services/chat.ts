@@ -1,32 +1,41 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import OpenAI from 'openai';
 import { environment } from '../../environments/environment';
+import { from, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatService {
-  private apiUrl = 'https://api.openai.com/v1/chat/completions';
+  private openai = new OpenAI({
+    apiKey: environment.openaiApiKey,
+    baseURL: environment.url,
+    dangerouslyAllowBrowser: true,
+  });
 
-  private apiKey = environment.openaiApiKey;
+  constructor() {}
 
-  constructor(private http: HttpClient) {}
+  sendMessage(message: string): Observable<any> {
+    const promise = this.openai.chat.completions
+      .create({
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Eres un asistente virtual de orientación profesional para estudiantes próximos a egresar de la Universidad Ean. Tu objetivo es mitigar la ansiedad tecnológica (AI Anxiety) explicándoles cómo la Inteligencia Artificial no los va a reemplazar, sino que es una herramienta para potenciar sus carreras en Ingeniería, Administración o Humanidades. Sé empático, académico, motivador y muy claro.',
+          },
+          {
+            role: 'user',
+            content: message,
+          },
+        ],
+        temperature: 0.7,
+      })
+      .then((response) => {
+        return { response: response.choices[0].message.content };
+      });
 
-  sendMessage(message: string) {
-
-    const body = {
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'Eres un asistente amigable y claro.' },
-        { role: 'user', content: message }
-      ]
-    };
-
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.apiKey}`
-    };
-
-    return this.http.post(this.apiUrl, body, { headers });
+    return from(promise);
   }
 }

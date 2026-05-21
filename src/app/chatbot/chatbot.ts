@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -14,32 +14,36 @@ import { ChatService } from '../chat.service';
 export class ChatbotComponent {
   messages: any[] = [];
   userInput = '';
-  loading = false;
+  isLoading = false;
 
-  constructor(private chatService: ChatService) {}
+  constructor(
+    private chatService: ChatService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   sendMessage() {
-
     const userMessage = this.userInput;
 
     this.messages.push({
       sender: 'Tú',
-      text: userMessage
+      text: userMessage,
     });
 
     this.userInput = '';
-    this.loading = true;
+    this.isLoading = true;
 
-    this.chatService.sendMessage(userMessage)
-      .subscribe((res: any) => {
-
-        this.messages.push({
-          sender: 'Bot',
-          text: res.choices[0].message.content
-        });
-
-        this.loading = false;
-
-      });
+    this.chatService.sendMessage(userMessage).subscribe({
+      next: (res) => {
+        this.messages.push({ text: res.response, isBot: true });
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error:', err);
+        this.messages.push({ text: 'Lo siento, tuve un error de conexión.', isBot: true });
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
 }

@@ -1,40 +1,28 @@
 import { Injectable } from '@angular/core';
-import OpenAI from 'openai';
-import { environment } from '../../environments/environment';
 import { from, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatService {
-  private openai = new OpenAI({
-    apiKey: environment.openaiApiKey,
-    baseURL: environment.url,
-    dangerouslyAllowBrowser: true,
-  });
-
   constructor() {}
 
   sendMessage(message: string): Observable<any> {
-    const promise = this.openai.chat.completions
-      .create({
-        model: 'llama-3.1-8b-instant',
-        messages: [
-          {
-            role: 'system',
-            content:
-              'Eres un asistente virtual de orientación profesional para estudiantes próximos a egresar de la Universidad Ean. Tu objetivo es mitigar la ansiedad tecnológica (AI Anxiety) explicándoles cómo la Inteligencia Artificial no los va a reemplazar, sino que es una herramienta para potenciar sus carreras en Ingeniería, Administración o Humanidades. Sé empático, académico, motivador y muy claro.',
-          },
-          {
-            role: 'user',
-            content: message,
-          },
-        ],
-        temperature: 0.7,
-      })
-      .then((response) => {
-        return { response: response.choices[0].message.content };
-      });
+    const promise = fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message }),
+    }).then(async (response) => {
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.response || 'No se pudo conectar con el backend.');
+      }
+
+      return data;
+    });
 
     return from(promise);
   }

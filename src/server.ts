@@ -6,7 +6,7 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
-import { findCareerByMessage, getAvailableCareers } from './career-db';
+import { CareerContext, findCareerByMessage, getAvailableCareers } from './career-db';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -14,6 +14,80 @@ const app = express();
 const angularApp = new AngularNodeAppEngine();
 app.use(express.json());
 
+function normalizeText(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+function isGreeting(message: string): boolean {
+  const normalizedMessage = normalizeText(message);
+
+  const greetings = [
+    'hola',
+    'holaa',
+    'buenas',
+    'buenos dias',
+    'buenas tardes',
+    'buenas noches',
+    'hey',
+    'hello',
+    'hi',
+    'que tal',
+    'como estas',
+  ];
+
+  return greetings.some((greeting) => normalizedMessage === greeting);
+}
+
+let lastCareerContext: CareerContext | null = null;
+
+function mentionsUnsupportedCareer(message: string): boolean {
+  const normalizedMessage = normalizeText(message);
+
+  const unsupportedCareers = [
+    'medicina',
+    'enfermeria',
+    'arquitectura',
+    'odontologia',
+    'veterinaria',
+    'derecho',
+    'psicologia',
+    'diseno grafico',
+    'diseño grafico',
+    'contaduria',
+    'contabilidad',
+    'comunicacion social',
+    'comunicación social',
+    'periodismo',
+    'educacion',
+    'educación',
+    'enfermería',
+  ];
+
+  const careerQuestionWords = [
+    'carrera',
+    'profesion',
+    'profesión',
+    'facultad',
+    'estudio',
+    'estudiar',
+    'pregrado',
+    'programa',
+  ];
+
+  const mentionsUnsupportedName = unsupportedCareers.some((career) =>
+    normalizedMessage.includes(normalizeText(career)),
+  );
+
+  const seemsCareerQuestion = careerQuestionWords.some((word) =>
+    normalizedMessage.includes(normalizeText(word)),
+  );
+
+  return mentionsUnsupportedName || seemsCareerQuestion;
+}
 
 app.post('/api/chat', async (req, res) => {
   const userMessage = req.body?.message;
@@ -24,15 +98,44 @@ app.post('/api/chat', async (req, res) => {
     });
   }
 
-  const career = findCareerByMessage(userMessage);
-
-  if (!career) {
-    const availableCareers = getAvailableCareers();
-
+  if (isGreeting(userMessage)) {
     return res.json({
-      response: `La carrera consultada no se encuentra disponible dentro de la base de carreras de la Universidad EAN para este asistente. Por ahora puedo orientarte sobre: ${availableCareers}.`,
+      response:
+        'Hola, soy el asistente de orientación profesional de la Universidad EAN. Puedo ayudarte a comprender cómo la inteligencia artificial impacta carreras como Administración de Empresas, Lenguas Modernas e Ingeniería de Sistemas, y qué habilidades puedes desarrollar para adaptarte.',
     });
   }
+
+const detectedCareer = findCareerByMessage(userMessage);
+
+if (!detectedCareer && mentionsUnsupportedCareer(userMessage)) {
+  const availableCareers = getAvailableCareers();
+
+  return res.json({
+    response: `La carrera consultada no se encuentra disponible dentro de la base de carreras de la Universidad EAN para este asistente.
+
+Por ahora puedo orientarte sobre:
+
+- ${availableCareers.split(', ').join('\n- ')}`,
+  });
+}
+
+const career = detectedCareer || lastCareerContext;
+
+if (!career) {
+  const availableCareers = getAvailableCareers();
+
+  return res.json({
+    response: `Para poder orientarte mejor, dime sobre cuál de estas carreras quieres preguntar:
+
+- ${availableCareers.split(', ').join('\n- ')}
+
+Por ejemplo: "¿Cómo impacta la IA en Ingeniería de Sistemas?"`,
+  });
+}
+
+if (detectedCareer) {
+  lastCareerContext = detectedCareer;
+}
 
   const groqApiKey = process.env['GROQ_API_KEY'];
 
@@ -72,12 +175,15 @@ ${userMessage}
 Contexto de la base de datos:
 ${careerContext}
 
-Responde incluyendo:
-1. Nombre de la facultad.
-2. Nombre de la carrera.
-3. Cómo impacta la IA esa carrera.
-4. Habilidades recomendadas.
-5. Consejos para adaptarse.
+Instrucciones de respuesta:
+- Usa el contexto de la base de datos para responder.
+- Si la pregunta es general sobre la carrera, incluye facultad, carrera, impacto de la IA, habilidades recomendadas y consejos.
+- Si la pregunta es específica, por ejemplo sobre cursos, herramientas, habilidades, primeros pasos o recomendaciones, responde solo esa pregunta.
+- No repitas toda la información de la carrera si el estudiante está haciendo una pregunta puntual.
+- Si el estudiante hace una pregunta de seguimiento, asume que se refiere a la carrera del contexto.
+- No uses markdown con asteriscos ni negritas.
+- Usa títulos cortos y listas con guiones cuando ayuden a ordenar la respuesta.
+- Mantén un tono claro, profesional, cercano y motivador.
 `,
           },
         ],

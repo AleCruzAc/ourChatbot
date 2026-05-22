@@ -56,7 +56,6 @@ function mentionsUnsupportedCareer(message: string): boolean {
     'derecho',
     'psicologia',
     'diseno grafico',
-    'diseño grafico',
     'contaduria',
     'contabilidad',
     'comunicacion social',
@@ -65,28 +64,15 @@ function mentionsUnsupportedCareer(message: string): boolean {
     'educacion',
     'educación',
     'enfermería',
-  ];
-
-  const careerQuestionWords = [
-    'carrera',
-    'profesion',
-    'profesión',
-    'facultad',
-    'estudio',
-    'estudiar',
-    'pregrado',
-    'programa',
+    'ingeniería de petróleos',
+    'petroleos',
   ];
 
   const mentionsUnsupportedName = unsupportedCareers.some((career) =>
     normalizedMessage.includes(normalizeText(career)),
   );
 
-  const seemsCareerQuestion = careerQuestionWords.some((word) =>
-    normalizedMessage.includes(normalizeText(word)),
-  );
-
-  return mentionsUnsupportedName || seemsCareerQuestion;
+  return mentionsUnsupportedName;
 }
 
 app.post('/api/chat', async (req, res) => {
@@ -177,10 +163,11 @@ ${careerContext}
 
 Instrucciones de respuesta:
 - Usa el contexto de la base de datos para responder.
-- Si la pregunta es general sobre la carrera, incluye facultad, carrera, impacto de la IA, habilidades recomendadas y consejos.
-- Si la pregunta es específica, por ejemplo sobre cursos, herramientas, habilidades, primeros pasos o recomendaciones, responde solo esa pregunta.
-- No repitas toda la información de la carrera si el estudiante está haciendo una pregunta puntual.
-- Si el estudiante hace una pregunta de seguimiento, asume que se refiere a la carrera del contexto.
+- No saludes ni te presentes, excepto cuando el mensaje del usuario sea un saludo.
+- Si la pregunta es general sobre la carrera, responde con una orientación completa: facultad, carrera, impacto de la IA, habilidades recomendadas y consejos.
+- Si la pregunta es específica, por ejemplo sobre trabajos, cursos, herramientas, idiomas, habilidades, primeros pasos o recomendaciones, responde únicamente esa pregunta.
+- Si el estudiante usa expresiones como "esta carrera", "mi carrera", "este programa" o "esa facultad", entiende que se refiere a la carrera del contexto.
+- No repitas toda la información de la carrera en preguntas de seguimiento.
 - No uses markdown con asteriscos ni negritas.
 - Usa títulos cortos y listas con guiones cuando ayuden a ordenar la respuesta.
 - Mantén un tono claro, profesional, cercano y motivador.

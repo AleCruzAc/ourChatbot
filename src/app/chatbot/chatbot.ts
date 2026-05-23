@@ -14,7 +14,7 @@ export class ChatbotComponent {
   messages: any[] = [];
   userInput = '';
   isLoading = false;
-  isSidebarOpen: boolean = false;
+  isSidebarOpen: boolean = true;
 
   constructor(
     private chatService: ChatService,
@@ -53,7 +53,6 @@ export class ChatbotComponent {
   createNewChat() {
     this.messages = [];
     this.userInput = '';
-    this.isSidebarOpen = false;
 
     this.messages.push({
       text: '¡Hola! He iniciado un nuevo canal para ti. ¿Qué inquietud tienes hoy sobre el futuro de tu profesión y la Inteligencia Artificial?',

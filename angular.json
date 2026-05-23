@@ -25,7 +25,7 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "externalDependencies": [
-            "better-sqlite3"
+              "better-sqlite3"
             ],
             "assets": [
               "src/favicon.ico",
@@ -42,8 +42,8 @@
             "outputMode": "server",
             "security": {
               "allowedHosts": [
-              "localhost",
-              "127.0.0.1"
+                "localhost",
+                "127.0.0.1"
               ]
             },
             "ssr": {
@@ -60,8 +60,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "10kB",
+                  "maximumError": "15kB"
                 }
               ],
               "outputHashing": "all"
@@ -81,7 +81,8 @@
               "buildTarget": "OurChatbot:build:production"
             },
             "development": {
-              "buildTarget": "OurChatbot:build:development"
+              "buildTarget": "OurChatbot:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

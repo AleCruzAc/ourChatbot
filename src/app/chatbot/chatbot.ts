@@ -1,7 +1,7 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatService } from '../chat.service';
+import { ChatService } from '../services/chat';
 
 @Component({
   selector: 'app-chatbot',
@@ -13,16 +13,16 @@ import { ChatService } from '../chat.service';
 export class ChatbotComponent {
   messages: any[] = [];
   userInput = '';
-  loading = false;
-  errorMessage = '';
+  isLoading = false;
+  isSidebarOpen: boolean = false;
 
   constructor(
     private chatService: ChatService,
-    private changeDetector: ChangeDetectorRef,
+    private cdr: ChangeDetectorRef,
   ) {}
 
-  async sendMessage() {
-    const userMessage = this.userInput.trim();
+  sendMessage() {
+    if (!this.userInput.trim()) return;
 
     if (!userMessage || this.loading) {
       return;
@@ -31,30 +31,37 @@ export class ChatbotComponent {
     this.errorMessage = '';
 
     this.messages.push({
-      sender: 'Tu',
+      sender: 'Tú',
       text: userMessage,
+      isBot: false
     });
 
     this.userInput = '';
-    this.loading = true;
+    this.isLoading = true;
 
-    try {
-      const res = await this.chatService.sendMessage(userMessage);
-      const botText = res?.choices?.[0]?.message?.content;
+    this.chatService.sendMessage(userMessage).subscribe({
+      next: (res: any) => {
+        this.messages.push({ text: res.response, isBot: true });
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Error:', err);
+        this.messages.push({ text: 'Lo siento, tuve un error de conexión.', isBot: true });
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
 
-      this.messages.push({
-        sender: 'Bot',
-        text: botText || 'No recibi una respuesta valida del asistente.',
-      });
-    } catch (error) {
-      console.error('Chat request failed:', error);
-      this.errorMessage =
-        error instanceof Error
-          ? error.message
-          : 'No se pudo conectar con el asistente. Intenta de nuevo.';
-    } finally {
-      this.loading = false;
-      this.changeDetector.detectChanges();
-    }
+  createNewChat() {
+    this.messages = [];
+    this.userInput = '';
+    this.isSidebarOpen = false;
+
+    this.messages.push({
+      text: '¡Hola! He iniciado un nuevo canal para ti. ¿Qué inquietud tienes hoy sobre el futuro de tu profesión y la Inteligencia Artificial?',
+      isBot: true
+    });
   }
 }

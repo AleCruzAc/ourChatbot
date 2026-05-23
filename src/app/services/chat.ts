@@ -1,32 +1,29 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
+import { from, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatService {
-  private apiUrl = 'https://api.openai.com/v1/chat/completions';
+  constructor() {}
 
-  private apiKey = environment.openaiApiKey;
+  sendMessage(message: string): Observable<any> {
+    const promise = fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message }),
+    }).then(async (response) => {
+      const data = await response.json();
 
-  constructor(private http: HttpClient) {}
+      if (!response.ok) {
+        throw new Error(data?.response || 'No se pudo conectar con el backend.');
+      }
 
-  sendMessage(message: string) {
+      return data;
+    });
 
-    const body = {
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'Eres un asistente amigable y claro.' },
-        { role: 'user', content: message }
-      ]
-    };
-
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.apiKey}`
-    };
-
-    return this.http.post(this.apiUrl, body, { headers });
+    return from(promise);
   }
 }

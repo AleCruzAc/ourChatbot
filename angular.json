@@ -3,7 +3,7 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "analytics": false
+    "analytics": "5069d490-9b76-4857-b89a-a204ce2a470a"
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -24,7 +24,12 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "externalDependencies": [
+            "better-sqlite3"
+            ],
             "assets": [
+              "src/favicon.ico",
+              "src/assets",
               {
                 "glob": "**/*",
                 "input": "public"
@@ -37,8 +42,8 @@
             "outputMode": "server",
             "security": {
               "allowedHosts": [
-                "localhost",
-                "127.0.0.1"
+              "localhost",
+              "127.0.0.1"
               ]
             },
             "ssr": {

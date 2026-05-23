@@ -1,4 +1,5 @@
 export const environment = {
-  production: true,
-  openaiApiKey: 'YOUR_API_KEY_HERE'
+  production: false,
+    openaiApiKey: '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',
+    url: 'https://api.groq.com/openai/v1'
 };

@@ -1,14 +1,100 @@
-<div class="chat-section">
-    <div class="chat-container">
-        <div *ngFor="let message of messages">
-            <b>{{message.sender}}:</b> {{message.text}}
-        </div>
-
-        <div *ngIf="isLoading">Escribiendo...</div>
-
-        <div class="input-container">
-            <input [(ngModel)]="userInput" placeholder="Escribe tu mensaje..." />
-            <button (click)="sendMessage()">Enviar</button>
-        </div>
+<div class="chat">
+  <aside class="chat__sidebar" *ngIf="isSidebarOpen" [ngClass]="{'chat__sidebar--open': isSidebarOpen}">
+    <div class="chat__sidebar-header">
+      <button class="chat__btn-new" (click)="createNewChat()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Nuevo chat
+      </button>
+      <button class="chat__btn-close" (click)="isSidebarOpen = false">✕</button>
     </div>
+
+    <div class="chat__history">
+      <p class="chat__history-title">Conversaciones recientes</p>
+      <ul class="chat__history-list">
+        <li class="chat__history-item chat__history-item--active">
+          <span class="chat__history-icon">💬</span> Orientación IA Sistemas
+        </li>
+        <li class="chat__history-item">
+          <span class="chat__history-icon">💬</span> Ansiedad Tecnológica
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <div class="chat__main">
+
+    <header class="chat__header">
+      <div class="chat__header-inner">
+        <div class="chat__header-left">
+          <button class="chat__btn-menu" *ngIf="!isSidebarOpen" (click)="isSidebarOpen = true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <img src="../../assets/images/logo_icon.png" alt="Logo Ean" class="chat__logo">
+        </div>
+
+        <div class="chat__titles">
+          <h1 class="chat__title">Orientador Profesional IA</h1>
+        </div>
+
+        <div class="chat__status">
+          <span class="chat__status-indicator"></span> En línea
+        </div>
+      </div>
+    </header>
+
+    <main class="chat__body">
+      <div class="chat__container">
+
+        <div *ngFor="let message of messages" class="chat__message"
+          [ngClass]="{'chat__message--bot': message.isBot, 'chat__message--user': !message.isBot}">
+
+          <div *ngIf="message.isBot" class="chat__avatar chat__avatar--bot">🤖</div>
+
+          <div class="chat__bubble"
+            [ngClass]="{'chat__bubble--bot': message.isBot, 'chat__bubble--user': !message.isBot}">
+            {{ message.text }}
+          </div>
+
+          <div *ngIf="!message.isBot" class="chat__avatar chat__avatar--user">👤</div>
+        </div>
+
+        <div *ngIf="isLoading" class="chat__message chat__message--bot">
+          <div class="chat__avatar chat__avatar--bot">🤖</div>
+          <div class="chat__bubble chat__bubble--bot chat__bubble--loading">
+            <span class="typing-text">Escribiendo...</span>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <footer class="chat__footer">
+      <div class="chat__container">
+
+        <div class="chat__input-wrapper">
+
+          <input type="text" class="chat__input" placeholder="Escribe tu inquietud sobre tu carrera y la IA aquí..."
+            [(ngModel)]="userInput" (keyup.enter)="sendMessage()" />
+
+          <button class="chat__btn-send" (click)="sendMessage()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+
+        </div>
+
+      </div>
+    </footer>
+  </div>
+
 </div>

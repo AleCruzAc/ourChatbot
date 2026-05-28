@@ -66,6 +66,48 @@ function mentionsUnsupportedCareer(message: string): boolean {
     'enfermería',
     'ingeniería de petróleos',
     'petroleos',
+    'ingenieria aeroespacial',
+    'ingeniería aeroespacial',
+    'ingenieria civil',
+    'ingeniería civil',
+    'ingenieria industrial',
+    'ingeniería industrial',
+    'ingenieria mecanica',
+    'ingeniería mecánica',
+    'ingenieria mecatronica',
+    'ingeniería mecatrónica',
+    'ingenieria ambiental',
+    'ingeniería ambiental',
+    'ingenieria electronica',
+    'ingeniería electrónica',
+    'biologia',
+    'biología',
+    'quimica',
+    'química',
+    'fisica',
+    'física',
+    'matematicas',
+    'matemáticas',
+    'mercadeo',
+    'negocios internacionales',
+    'economia',
+    'economía',
+    'finanzas',
+    'gastronomia',
+    'gastronomía',
+    'cine',
+    'musica',
+    'música',
+    'artes',
+    'publicidad',
+    'relaciones internacionales',
+    'ciencia politica',
+    'ciencia política',
+    'trabajo social',
+    'terapia ocupacional',
+    'fisioterapia',
+    'nutricion',
+    'nutrición',
   ];
 
   const mentionsUnsupportedName = unsupportedCareers.some((career) =>
@@ -93,6 +135,53 @@ app.post('/api/chat', async (req, res) => {
 
 const detectedCareer = findCareerByMessage(userMessage);
 
+if (detectedCareer) {
+  lastCareerContext = detectedCareer;
+}
+
+const normalizedMessage = normalizeText(userMessage);
+
+const normalizedCareerName = detectedCareer
+  ? normalizeText(detectedCareer.name)
+  : '';
+
+if (detectedCareer && normalizedMessage === normalizedCareerName) {
+  return res.json({
+    response: `Carrera: ${detectedCareer.name}
+
+Facultad: ${detectedCareer.faculty}
+
+Impacto de la inteligencia artificial:
+${detectedCareer.context
+  .replace(/^La carrera de .*? pertenece a la Facultad .*?\.\s*/i, '')
+  .split('Para adaptarse')[0]
+  .trim()}
+
+Qué debes fortalecer:
+Para adaptarte al futuro profesional, es importante desarrollar:
+
+- Pensamiento crítico
+- Habilidades digitales
+- Uso responsable de herramientas de IA
+- Capacidad de análisis
+- Adaptación al cambio
+
+Nuevas oportunidades:
+La integración de IA abre oportunidades en áreas relacionadas con esta carrera, especialmente en procesos digitales, análisis de información, automatización y toma de decisiones apoyada por tecnología.
+
+Recomendación:
+La IA no reemplaza esta carrera, pero sí transforma las habilidades más valoradas. Aprender a trabajar junto a herramientas inteligentes puede darte una ventaja profesional importante.
+
+También puedes preguntarme sobre:
+
+- Cursos recomendados
+- Habilidades importantes
+- Herramientas de IA útiles
+- Salidas laborales
+- Cómo adaptarte profesionalmente`,
+  });
+}
+
 if (!detectedCareer && mentionsUnsupportedCareer(userMessage)) {
   const availableCareers = getAvailableCareers();
 
@@ -117,10 +206,6 @@ if (!career) {
 
 Por ejemplo: "¿Cómo impacta la IA en Ingeniería de Sistemas?"`,
   });
-}
-
-if (detectedCareer) {
-  lastCareerContext = detectedCareer;
 }
 
   const groqApiKey = process.env['GROQ_API_KEY'];
@@ -158,23 +243,32 @@ Contexto: ${career.context}
 Pregunta del estudiante:
 ${userMessage}
 
+Carrera activa:
+${career.name}
+
 Contexto de la base de datos:
 ${careerContext}
 
 Instrucciones de respuesta:
-- Usa el contexto de la base de datos para responder.
-- No saludes ni te presentes, excepto cuando el mensaje del usuario sea un saludo.
-- Si la pregunta es general sobre la carrera, responde con una orientación completa: facultad, carrera, impacto de la IA, habilidades recomendadas y consejos.
-- Si la pregunta es específica, por ejemplo sobre trabajos, cursos, herramientas, idiomas, habilidades, primeros pasos o recomendaciones, responde únicamente esa pregunta.
-- Si el estudiante usa expresiones como "esta carrera", "mi carrera", "este programa" o "esa facultad", entiende que se refiere a la carrera del contexto.
-- No repitas toda la información de la carrera en preguntas de seguimiento.
-- No uses markdown con asteriscos ni negritas.
-- Usa títulos cortos y listas con guiones cuando ayuden a ordenar la respuesta.
-- Mantén un tono claro, profesional, cercano y motivador.
+- La pregunta del estudiante es lo principal. Responde directamente lo que preguntó.
+- Usa la carrera activa como contexto, pero no copies todo el contexto de la base de datos.
+- Si el estudiante pregunta por cursos, responde solo sobre cursos recomendados para la carrera activa.
+- Si pregunta por empleos, trabajos, áreas mejor pagadas o salidas laborales, responde solo sobre oportunidades laborales.
+- Si pregunta por habilidades, responde solo sobre habilidades.
+- Si pregunta por herramientas, responde solo sobre herramientas.
+- Si pregunta cómo adaptarse, responde solo con recomendaciones de adaptación.
+- Si el estudiante usa frases como "esta carrera", "mi carrera", "la carrera" o "este programa", entiende que habla de la carrera activa.
+- No vuelvas a escribir Carrera, Facultad, Impacto de la IA, Habilidades recomendadas ni Consejo final, excepto si el estudiante pide explícitamente una explicación general desde cero.
+- No empieces la respuesta repitiendo la pregunta del estudiante.
+- No uses la pregunta del estudiante como título.
+- No escribas símbolos ** ni uses markdown.
+- Usa máximo 2 secciones con títulos naturales según la pregunta, por ejemplo: Cursos recomendados, Habilidades clave, Salidas laborales, Herramientas útiles o Recomendaciones.
+- Usa listas cortas con guiones si ayuda.
+- Mantén un tono claro, profesional y directo.
 `,
           },
         ],
-        temperature: 0.7,
+        temperature: 0.3,
       }),
     });
 

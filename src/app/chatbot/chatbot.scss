@@ -285,7 +285,8 @@ $text-dark: #000000;
     padding: 16px 22px;
     border-radius: 22px;
     font-size: 1rem;
-    line-height: 1.5;
+    line-height: 1.6;
+    white-space: pre-line;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 
     &--bot {

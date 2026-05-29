@@ -146,39 +146,23 @@ const normalizedCareerName = detectedCareer
   : '';
 
 if (detectedCareer && normalizedMessage === normalizedCareerName) {
+  const formattedContext = detectedCareer.context
+    .replace(/^La carrera de .*? pertenece a la Facultad .*?\.\s*/i, '')
+    .replace(/Impacto de la IA:/g, 'Impacto de la inteligencia artificial:')
+    .replace(/Herramientas clave:/g, 'Herramientas clave que debes dominar:')
+    .replace(/Habilidades estratégicas:/g, 'Habilidades estratégicas a fortalecer:')
+    .replace(/Nuevos roles laborales:/g, 'Nuevos roles laborales (salidas):')
+    .replace(/Enfoque eanista:/g, 'Tu ventaja Eanista:')
+    .trim();
+
   return res.json({
     response: `Carrera: ${detectedCareer.name}
 
 Facultad: ${detectedCareer.faculty}
 
-Impacto de la inteligencia artificial:
-${detectedCareer.context
-  .replace(/^La carrera de .*? pertenece a la Facultad .*?\.\s*/i, '')
-  .split('Para adaptarse')[0]
-  .trim()}
+${formattedContext}
 
-Qué debes fortalecer:
-Para adaptarte al futuro profesional, es importante desarrollar:
-
-- Pensamiento crítico
-- Habilidades digitales
-- Uso responsable de herramientas de IA
-- Capacidad de análisis
-- Adaptación al cambio
-
-Nuevas oportunidades:
-La integración de IA abre oportunidades en áreas relacionadas con esta carrera, especialmente en procesos digitales, análisis de información, automatización y toma de decisiones apoyada por tecnología.
-
-Recomendación:
-La IA no reemplaza esta carrera, pero sí transforma las habilidades más valoradas. Aprender a trabajar junto a herramientas inteligentes puede darte una ventaja profesional importante.
-
-También puedes preguntarme sobre:
-
-- Cursos recomendados
-- Habilidades importantes
-- Herramientas de IA útiles
-- Salidas laborales
-- Cómo adaptarte profesionalmente`,
+¿Te gustaría saber cómo empezar a aprender alguna de estas herramientas o qué cursos específicos te pueden servir?`,
   });
 }
 
@@ -261,7 +245,8 @@ Instrucciones de respuesta:
 - No vuelvas a escribir Carrera, Facultad, Impacto de la IA, Habilidades recomendadas ni Consejo final, excepto si el estudiante pide explícitamente una explicación general desde cero.
 - No empieces la respuesta repitiendo la pregunta del estudiante.
 - No uses la pregunta del estudiante como título.
-- No escribas símbolos ** ni uses markdown.
+- Está prohibido usar Markdown o símbolos ** en cualquier parte de la respuesta.
+- Si necesitas un título, escríbelo sin formato, por ejemplo: Herramientas útiles:
 - Usa máximo 2 secciones con títulos naturales según la pregunta, por ejemplo: Cursos recomendados, Habilidades clave, Salidas laborales, Herramientas útiles o Recomendaciones.
 - Usa listas cortas con guiones si ayuda.
 - Mantén un tono claro, profesional y directo.

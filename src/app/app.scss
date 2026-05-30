@@ -5,12 +5,19 @@
   padding: 0;
 }
 
+
 html, body {
-  height: 100vh;
-  width: 100%; /* Usar 100% en lugar de 100vw evita el scroll horizontal */
-  overflow: hidden; /* Corta de raíz cualquier scroll */
+  min-height: 100vh;
+  width: 100%;
   background-color: #f4f6f8;
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+app-root, body > app-root, .main {
+  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
 }
 
 .main {

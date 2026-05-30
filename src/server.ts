@@ -8,8 +8,6 @@ import {
   isMainModule,
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
-import express from 'express';
-import { join } from 'node:path';
 import { CareerContext, findCareerByMessage, getAvailableCareers } from './career-db';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
@@ -260,7 +258,7 @@ Instrucciones de respuesta:
       }),
     });
 
-    const data = await groqResponse.json();
+    const data = (await groqResponse.json()) as any;
 
     if (!groqResponse.ok) {
       console.error('Groq API error:', data);

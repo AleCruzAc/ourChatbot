@@ -69,6 +69,48 @@ function mentionsUnsupportedCareer(message: string): boolean {
     'enfermería',
     'ingeniería de petróleos',
     'petroleos',
+    'ingenieria aeroespacial',
+    'ingeniería aeroespacial',
+    'ingenieria civil',
+    'ingeniería civil',
+    'ingenieria industrial',
+    'ingeniería industrial',
+    'ingenieria mecanica',
+    'ingeniería mecánica',
+    'ingenieria mecatronica',
+    'ingeniería mecatrónica',
+    'ingenieria ambiental',
+    'ingeniería ambiental',
+    'ingenieria electronica',
+    'ingeniería electrónica',
+    'biologia',
+    'biología',
+    'quimica',
+    'química',
+    'fisica',
+    'física',
+    'matematicas',
+    'matemáticas',
+    'mercadeo',
+    'negocios internacionales',
+    'economia',
+    'economía',
+    'finanzas',
+    'gastronomia',
+    'gastronomía',
+    'cine',
+    'musica',
+    'música',
+    'artes',
+    'publicidad',
+    'relaciones internacionales',
+    'ciencia politica',
+    'ciencia política',
+    'trabajo social',
+    'terapia ocupacional',
+    'fisioterapia',
+    'nutricion',
+    'nutrición',
   ];
 
   const mentionsUnsupportedName = unsupportedCareers.some((career) =>
@@ -96,6 +138,37 @@ app.post('/api/chat', async (req, res) => {
 
 const detectedCareer = findCareerByMessage(userMessage);
 
+if (detectedCareer) {
+  lastCareerContext = detectedCareer;
+}
+
+const normalizedMessage = normalizeText(userMessage);
+
+const normalizedCareerName = detectedCareer
+  ? normalizeText(detectedCareer.name)
+  : '';
+
+if (detectedCareer && normalizedMessage === normalizedCareerName) {
+  const formattedContext = detectedCareer.context
+    .replace(/^La carrera de .*? pertenece a la Facultad .*?\.\s*/i, '')
+    .replace(/Impacto de la IA:/g, 'Impacto de la inteligencia artificial:')
+    .replace(/Herramientas clave:/g, 'Herramientas clave que debes dominar:')
+    .replace(/Habilidades estratégicas:/g, 'Habilidades estratégicas a fortalecer:')
+    .replace(/Nuevos roles laborales:/g, 'Nuevos roles laborales (salidas):')
+    .replace(/Enfoque eanista:/g, 'Tu ventaja Eanista:')
+    .trim();
+
+  return res.json({
+    response: `Carrera: ${detectedCareer.name}
+
+Facultad: ${detectedCareer.faculty}
+
+${formattedContext}
+
+¿Te gustaría saber cómo empezar a aprender alguna de estas herramientas o qué cursos específicos te pueden servir?`,
+  });
+}
+
 if (!detectedCareer && mentionsUnsupportedCareer(userMessage)) {
   const availableCareers = getAvailableCareers();
 
@@ -120,10 +193,6 @@ if (!career) {
 
 Por ejemplo: "¿Cómo impacta la IA en Ingeniería de Sistemas?"`,
   });
-}
-
-if (detectedCareer) {
-  lastCareerContext = detectedCareer;
 }
 
   const groqApiKey = process.env['GROQ_API_KEY'];
@@ -161,23 +230,33 @@ Contexto: ${career.context}
 Pregunta del estudiante:
 ${userMessage}
 
+Carrera activa:
+${career.name}
+
 Contexto de la base de datos:
 ${careerContext}
 
 Instrucciones de respuesta:
-- Usa el contexto de la base de datos para responder.
-- No saludes ni te presentes, excepto cuando el mensaje del usuario sea un saludo.
-- Si la pregunta es general sobre la carrera, responde con una orientación completa: facultad, carrera, impacto de la IA, habilidades recomendadas y consejos.
-- Si la pregunta es específica, por ejemplo sobre trabajos, cursos, herramientas, idiomas, habilidades, primeros pasos o recomendaciones, responde únicamente esa pregunta.
-- Si el estudiante usa expresiones como "esta carrera", "mi carrera", "este programa" o "esa facultad", entiende que se refiere a la carrera del contexto.
-- No repitas toda la información de la carrera en preguntas de seguimiento.
-- No uses markdown con asteriscos ni negritas.
-- Usa títulos cortos y listas con guiones cuando ayuden a ordenar la respuesta.
-- Mantén un tono claro, profesional, cercano y motivador.
+- La pregunta del estudiante es lo principal. Responde directamente lo que preguntó.
+- Usa la carrera activa como contexto, pero no copies todo el contexto de la base de datos.
+- Si el estudiante pregunta por cursos, responde solo sobre cursos recomendados para la carrera activa.
+- Si pregunta por empleos, trabajos, áreas mejor pagadas o salidas laborales, responde solo sobre oportunidades laborales.
+- Si pregunta por habilidades, responde solo sobre habilidades.
+- Si pregunta por herramientas, responde solo sobre herramientas.
+- Si pregunta cómo adaptarse, responde solo con recomendaciones de adaptación.
+- Si el estudiante usa frases como "esta carrera", "mi carrera", "la carrera" o "este programa", entiende que habla de la carrera activa.
+- No vuelvas a escribir Carrera, Facultad, Impacto de la IA, Habilidades recomendadas ni Consejo final, excepto si el estudiante pide explícitamente una explicación general desde cero.
+- No empieces la respuesta repitiendo la pregunta del estudiante.
+- No uses la pregunta del estudiante como título.
+- Está prohibido usar Markdown o símbolos ** en cualquier parte de la respuesta.
+- Si necesitas un título, escríbelo sin formato, por ejemplo: Herramientas útiles:
+- Usa máximo 2 secciones con títulos naturales según la pregunta, por ejemplo: Cursos recomendados, Habilidades clave, Salidas laborales, Herramientas útiles o Recomendaciones.
+- Usa listas cortas con guiones si ayuda.
+- Mantén un tono claro, profesional y directo.
 `,
           },
         ],
-        temperature: 0.7,
+        temperature: 0.3,
       }),
     });
 
